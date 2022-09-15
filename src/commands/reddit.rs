@@ -3,8 +3,6 @@ use rand::prelude::*;
 use roux::util::{FeedOption, TimePeriod};
 use roux::Subreddit;
 use serenity::builder::CreateEmbed;
-use std::collections::HashMap;
-use std::error::Error;
 
 #[derive(Default)]
 pub struct RedditCommand {}

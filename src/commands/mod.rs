@@ -1,5 +1,4 @@
 use serenity::builder::CreateEmbed;
-use serenity::model::channel::AttachmentType;
 use serenity::model::prelude::interaction::InteractionResponseType;
 
 pub mod reddit;
