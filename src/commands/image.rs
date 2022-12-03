@@ -1,15 +1,72 @@
+use crate::Ctx;
+
 use anyhow::{Context, Result};
 use image::codecs::jpeg::JpegEncoder;
 use image::imageops::{FilterType, Nearest};
 use image::io::Reader;
-use serenity::builder::CreateEmbed;
-use serenity::model::prelude::AttachmentType;
+use mime::Mime;
+use poise::futures_util::StreamExt;
+use poise::serenity_prelude::{Attachment, AttachmentType, CacheHttp, Embed, Message};
+use poise::{serenity_prelude as serenity, CreateReply};
 use std::borrow::Cow;
+use std::future;
 use std::io::Cursor;
+use std::str::FromStr;
 
-use crate::CommandResponse;
+/// Nuke the previous image
+#[poise::command(slash_command)]
+pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
+    ctx.defer().await?;
+    let msg_res = Box::pin(
+        ctx.channel_id()
+            .messages_iter(&ctx.http())
+            .filter(|res| future::ready(res.is_ok()))
+            .map(|res| res.unwrap())
+            .take(20)
+            .filter(|msg: &Message| {
+                future::ready(
+                    msg.attachments.iter().any(|a: &Attachment| {
+                        a.content_type
+                            .as_ref()
+                            .filter(|c| filter_image_mine(c))
+                            .is_some()
+                    }) || msg.embeds.iter().any(|embed: &Embed| embed.image.is_some()),
+                )
+            }),
+    )
+    .next()
+    .await;
 
-pub async fn nuke<'a>(url: String) -> Result<CommandResponse<'a>> {
+    let url: String = if let Some(msg) = msg_res {
+        msg.attachments
+            .iter()
+            .filter(|a| {
+                a.content_type
+                    .as_ref()
+                    .filter(|c| filter_image_mine(c))
+                    .is_some()
+            })
+            .map(|a| &a.url)
+            .next()
+            .or_else(|| {
+                msg.embeds
+                    .iter()
+                    .filter_map(|e: &Embed| e.image.as_ref())
+                    .map(|ei| &ei.url)
+                    .next()
+            })
+            .expect(
+                "Stuart assumed the message filter would ensure the message would have an image",
+            )
+            .to_string()
+    } else {
+        return ctx
+            .say("Bruv, looked 20 messages back, no fucking images")
+            .await
+            .map(|_| ())
+            .context("Failed to send reply");
+    };
+
     let mut img = Reader::new(Cursor::new(
         reqwest::get(url)
             .await
@@ -36,11 +93,22 @@ pub async fn nuke<'a>(url: String) -> Result<CommandResponse<'a>> {
         .encode_image(&img)
         .context("Failed to re-encoded image")?;
 
-    Ok(CommandResponse {
-        attachment: Some(AttachmentType::Bytes {
+    ctx.send(|f: &mut poise::reply::CreateReply| {
+        f.attachment(AttachmentType::Bytes {
             data: Cow::Owned(jpeg.into_inner()),
             filename: "image.jpeg".to_string(),
-        }),
-        ..Default::default()
+        })
+        .reply(true)
     })
+    .await?;
+
+    Ok(())
+}
+
+fn filter_image_mine(m: &str) -> bool {
+    if let Ok(mime_val) = Mime::from_str(m) {
+        mime_val.type_() == mime::IMAGE
+    } else {
+        false
+    }
 }
