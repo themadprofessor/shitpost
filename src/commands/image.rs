@@ -12,9 +12,11 @@ use std::borrow::Cow;
 use std::future;
 use std::io::Cursor;
 use std::str::FromStr;
+use tracing::{debug, instrument};
 
 /// Nuke the previous image
 #[poise::command(slash_command)]
+#[instrument]
 pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
     ctx.defer().await?;
     let msg_res = Box::pin(
@@ -36,6 +38,7 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
     )
     .next()
     .await;
+    debug!(message = ?msg_res);
 
     let url: String = if let Some(msg) = msg_res {
         msg.attachments
@@ -66,6 +69,7 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
             .map(|_| ())
             .context("Failed to send reply");
     };
+    debug!(url);
 
     let mut img = Reader::new(Cursor::new(
         reqwest::get(url)
@@ -82,6 +86,7 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
 
     let width = img.width();
     let height = img.height();
+    debug!(old_width = width, old_height = height);
     img = img
         .resize(200, 200, Nearest)
         .resize(width, height, Nearest)
@@ -92,6 +97,7 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
     JpegEncoder::new_with_quality(&mut jpeg, 1)
         .encode_image(&img)
         .context("Failed to re-encoded image")?;
+    debug!(final_img_size = jpeg.get_ref().len());
 
     ctx.send(|f: &mut poise::reply::CreateReply| {
         f.attachment(AttachmentType::Bytes {

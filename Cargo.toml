@@ -2,6 +2,8 @@
 name = "shitpost"
 version = "0.1.0"
 edition = "2021"
+authors = ["Stuart <stu@reilly-family.co.uk>"]
+description = "Discord shitposting bot"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,6 +18,10 @@ anyhow = "1"
 poise = "0.5"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+figment = { version = "0.10", features = ["env", "toml"] }
+clap = { version = "4.0", features = ["derive"] }
+directories = "4.0"
+serde = "1"
 
 [dev-dependencies]
 rusty-hook = "0.11"

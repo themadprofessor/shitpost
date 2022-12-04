@@ -8,6 +8,6 @@ use std::future::Future;
 pub mod image;
 pub mod reddit;
 
-pub fn get_commands() -> Vec<Command<crate::Data, anyhow::Error>> {
+pub fn get_commands() -> Vec<Command<crate::Config, anyhow::Error>> {
     vec![image::nuke(), reddit::random_image()]
 }
