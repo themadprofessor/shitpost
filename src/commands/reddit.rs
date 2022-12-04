@@ -40,7 +40,7 @@ impl Into<TimePeriod> for Period {
 
 /// Get a random image from the top 20 posts of a given subreddit this week.
 #[poise::command(slash_command)]
-#[instrument]
+#[instrument(skip(ctx), name = "random_image")]
 pub async fn random_image(
     ctx: Ctx<'_>,
     #[description = "Subreddit to get the image from. No / or r/ plz"] subreddit: String,

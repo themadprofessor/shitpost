@@ -16,7 +16,7 @@ use tracing::{debug, instrument};
 
 /// Nuke the previous image
 #[poise::command(slash_command)]
-#[instrument]
+#[instrument(skip(ctx), name = "nuke")]
 pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
     ctx.defer().await?;
     let msg_res = Box::pin(
@@ -38,9 +38,13 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
     )
     .next()
     .await;
-    debug!(message = ?msg_res);
 
     let url: String = if let Some(msg) = msg_res {
+        debug!(
+            message_author = msg.user.name,
+            message_id = msg.id,
+            "image message found"
+        );
         msg.attachments
             .iter()
             .filter(|a| {
@@ -99,7 +103,7 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
         .context("Failed to re-encoded image")?;
     debug!(final_img_size = jpeg.get_ref().len());
 
-    ctx.send(|f: &mut poise::reply::CreateReply| {
+    ctx.send(|f: &mut CreateReply| {
         f.attachment(AttachmentType::Bytes {
             data: Cow::Owned(jpeg.into_inner()),
             filename: "image.jpeg".to_string(),
