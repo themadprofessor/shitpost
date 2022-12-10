@@ -2,7 +2,7 @@
 Description=Shitpost Discord Bot
 
 [Service]
-ExecStart=/usr/bin/shitpost
+ExecStart=/usr/bin/shitpost --config-file=/etc/shitpost.toml
 Type=simple
 
 [Install]

@@ -3,6 +3,7 @@ use clap::Parser;
 use figment::providers::{Env, Format, Serialized, Toml};
 use figment::Figment;
 use std::env;
+use std::path::PathBuf;
 use std::str::FromStr;
 
 use mime::Mime;
@@ -25,6 +26,10 @@ struct Arguments {
     /// Discord API token
     #[arg(short, long, value_name = "TOKEN")]
     discord_token: Option<String>,
+
+    /// Path to config file
+    #[arg(short, long, value_name = "PATH", value_hint = clap::ValueHint::FilePath)]
+    config_file: Option<PathBuf>,
 }
 
 type Ctx<'a> = poise::Context<'a, Config, anyhow::Error>;
@@ -33,9 +38,16 @@ impl Config {
     fn new() -> Result<Self> {
         let dirs = directories::ProjectDirs::from("io", "shitty", "shitpost")
             .context("can't find home dir")?;
-        Figment::new()
-            .merge(Toml::file(dirs.config_dir().join("shitpost.toml")))
-            .merge(Serialized::defaults(Arguments::parse()))
+        let mut fig = Figment::new().merge(Toml::file(dirs.config_dir().join("shitpost.toml")));
+        let args = Arguments::parse();
+
+        fig = if let Some(cfg_file) = &args.config_file {
+            fig.merge(Toml::file(cfg_file))
+        } else {
+            fig
+        };
+
+        fig.merge(Serialized::defaults(args))
             .merge(Env::prefixed("SHITPOST_"))
             .extract()
             .context("failed to deserialize config data")

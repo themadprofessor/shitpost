@@ -41,8 +41,8 @@ pub async fn nuke(ctx: Ctx<'_>) -> Result<()> {
 
     let url: String = if let Some(msg) = msg_res {
         debug!(
-            message_author = msg.user.name,
-            message_id = msg.id,
+            message_author = msg.author.name,
+            message_id = msg.id.0,
             "image message found"
         );
         msg.attachments
