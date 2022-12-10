@@ -38,6 +38,9 @@ MacOS    $HOME/Library/Application Support/io.shitty.shitpost/shitpost.toml
 ```
 On linux, if `$XDG_CONFIG_HOME` is not set, `$HOME/.config` is used instead.+
 
+If `--config-file` is passed as a command line parameter, the file at the given path is merged in after the config file
+specified above if it exists.
+
 ### Command line arguments
 
 Use `shitpost --help` for a complete list of arguments.
