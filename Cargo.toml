@@ -19,7 +19,6 @@ poise = "0.5"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 figment = { version = "0.10", features = ["env", "toml"] }
-clap = { version = "4.0", features = ["derive"] }
 directories = "4.0"
 serde = "1"
 

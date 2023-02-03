@@ -3,14 +3,14 @@
 # shellcheck disable=SC2164
 # Maintainer: Stuart Reilly <stu@reilly-family.co.uk>
 _pkgname=shitpost
-pkgname=$pkgname-git
-pkgver=0.1.0
+pkgname=$_pkgname-git
+pkgver=r15.2a1bd5d
 pkgrel=1
 pkgdesc="Discord shitposting bot"
 arch=('x86_64')
 url="https://github.com/themadprofessor/shitpost"
 license=('MIT')
-depends=('libssl' 'libcrypto')
+depends=('libssl.so' 'libcrypto.so')
 makedepends=(cargo)
 backup=('etc/shitpost.toml')
 source=('git+https://github.com/themadprofessor/shitpost.git')
@@ -33,6 +33,6 @@ package() {
 }
 
 pkgver() {
-  cd $pkgname
+  cd $_pkgname
   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
