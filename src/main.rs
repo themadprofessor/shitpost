@@ -6,6 +6,7 @@ use std::env;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use clap::{arg, command, Parser};
 use mime::Mime;
 use poise::serenity_prelude as serenity;
 use serde::{Deserialize, Serialize};
@@ -20,6 +21,19 @@ pub struct Config {
     discord_token: String,
 }
 
+#[derive(Debug, Default, Serialize, Deserialize, Parser)]
+#[command(author, version, about)]
+struct Arguments {
+    /// Discord API token
+    #[arg(short, long, value_name = "TOKEN")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    discord_token: Option<String>,
+
+    /// Path to config file
+    #[arg(short, long, value_name = "PATH", value_hint = clap::ValueHint::FilePath)]
+    config_file: Option<PathBuf>,
+}
+
 type Ctx<'a> = poise::Context<'a, Config, anyhow::Error>;
 
 impl Config {
@@ -27,8 +41,16 @@ impl Config {
         let dirs = directories::ProjectDirs::from("io", "shitty", "shitpost")
             .context("can't find home dir")?;
 
-        Figment::new()
-            .merge(Toml::file(dirs.config_dir().join("shitpost.toml")))
+        let mut fig = Figment::new().merge(Toml::file(dirs.config_dir().join("shitpost.toml")));
+        let args = Arguments::parse();
+
+        fig = if let Some(cfg_file) = &args.config_file {
+            fig.merge(Toml::file(cfg_file))
+        } else {
+            fig
+        };
+
+        fig.merge(Serialized::defaults(args))
             .merge(Env::prefixed("SHITPOST_"))
             .extract()
             .context("failed to deserialize config data")
