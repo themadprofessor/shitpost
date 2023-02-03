@@ -1,4 +1,7 @@
-use crate::Ctx;
+use std::borrow::Cow;
+use std::future;
+use std::io::Cursor;
+use std::str::FromStr;
 
 use anyhow::{Context, Result};
 use image::codecs::jpeg::JpegEncoder;
@@ -8,11 +11,9 @@ use mime::Mime;
 use poise::futures_util::StreamExt;
 use poise::serenity_prelude::{Attachment, AttachmentType, CacheHttp, Embed, Message};
 use poise::{serenity_prelude as serenity, CreateReply};
-use std::borrow::Cow;
-use std::future;
-use std::io::Cursor;
-use std::str::FromStr;
 use tracing::{debug, instrument};
+
+use crate::Ctx;
 
 /// Nuke the previous image
 #[poise::command(slash_command)]

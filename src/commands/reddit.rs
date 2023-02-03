@@ -1,4 +1,3 @@
-use crate::Ctx;
 use anyhow::{bail, Result};
 use poise::serenity_prelude::CreateEmbed;
 use poise::CreateReply;
@@ -6,6 +5,8 @@ use rand::prelude::*;
 use roux::util::{FeedOption, TimePeriod};
 use roux::Subreddit;
 use tracing::{debug, instrument, span};
+
+use crate::Ctx;
 
 #[derive(Debug, poise::ChoiceParameter)]
 pub enum Ordering {

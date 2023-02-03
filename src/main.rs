@@ -1,12 +1,12 @@
-use anyhow::{Context, Result};
-use figment::providers::{Env, Format, Serialized, Toml};
-use figment::value::{Dict, Map};
-use figment::{Error, Figment, Metadata, Profile, Provider};
 use std::env;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use anyhow::{Context, Result};
 use clap::{arg, command, Parser};
+use figment::providers::{Env, Format, Serialized, Toml};
+use figment::value::{Dict, Map};
+use figment::{Error, Figment, Metadata, Profile, Provider};
 use mime::Mime;
 use poise::serenity_prelude as serenity;
 use serde::{Deserialize, Serialize};
