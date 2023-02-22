@@ -48,6 +48,10 @@ pub async fn cope(ctx: Ctx<'_>, #[description = "Whomst be coping"] copee: Membe
             data: Cow::Owned(jpeg.into_inner()),
             filename: "cope.jpeg".to_string(),
         })
+        .content(format!(
+            "Cope harder {}",
+            copee.nick.unwrap_or(copee.user.name)
+        ))
     })
     .await?;
 
