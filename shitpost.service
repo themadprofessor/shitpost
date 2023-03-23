@@ -1,7 +1,7 @@
 [Unit]
 Description=Shitpost Discord Bot
 Wants=network-online.target
-After=network-online.target
+After=network-online.target nss-lookup.target
 
 [Service]
 ExecStart=/usr/bin/shitpost --config-file=/etc/shitpost.toml
